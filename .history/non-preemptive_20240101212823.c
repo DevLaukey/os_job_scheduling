@@ -14,6 +14,7 @@ typedef struct {
     int age;
 } Process;
 
+void print_table(Process p[], int n);
 void print_gantt_chart(Process p[], int n);
 
 int main() {

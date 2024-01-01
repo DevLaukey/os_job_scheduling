@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <conio.h>
 
 #define MAX 200
 #define AGE_THRESHOLD 5
@@ -14,6 +15,7 @@ typedef struct {
     int age;
 } Process;
 
+void print_table(Process p[], int n);
 void print_gantt_chart(Process p[], int n);
 
 int main() {
@@ -75,6 +77,9 @@ int main() {
         sum_t_time += p[i].turnaround_time;
     }
 
+    // print table
+    puts(""); // Empty line
+    print_table(p, n);
     puts(""); // Empty Line
     printf("Average Waiting Time    : %-2.2lf\n", (double)sum_w_time / (double)n);
     printf("Average Turnaround Time : %-2.2lf\n", (double)sum_t_time / (double)n);
@@ -88,6 +93,14 @@ int main() {
     return 0;
 }
 
+void print_table(Process p[], int n) {
+    printf("| Process | Arrival Time | Burst Time | Waiting Time | Turnaround Time |\n");
+    printf("|---------|---------------|------------|--------------|-----------------|\n");
+    for (int i = 0; i < n; i++) {
+        printf("|   P%-4d |       %-8d |     %-6d |       %-8d |        %-9d |\n",
+               p[i].pid, p[i].arrival_time, p[i].burst_time, p[i].waiting_time, p[i].turnaround_time);
+    }
+}
 
 void print_gantt_chart(Process p[], int n) {
     int i, j;
@@ -124,6 +137,6 @@ void print_gantt_chart(Process p[], int n) {
         printf("%d", p[i].turnaround_time);
     }
     printf("\n");
-    getchar();
+    getch();
 }
 
