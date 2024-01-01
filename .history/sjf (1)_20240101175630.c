@@ -5,78 +5,79 @@
 typedef struct
 {
     int pid;
-    int burst_time;
-    int remaining_time;
-    int waiting_time;
-    int turnaround_time;
     int arrival_time;
+    int burst_time;
+    int start_time;
+    int w_time;
+    int t_time;
 } Process;
 
-void print_table(Process p[], int n);
 void print_gantt_chart(Process p[], int n);
 
 int main()
 {
     Process p[MAX];
-    int i, j, n, time = 0, q = 5;
+    int i, j;
+    int n = 7;
     int sum_w_time = 0, sum_t_time;
 
-    // Define the number of processes and initialize process values
-    n = 7; // Number of processes
-    int burst_times[] = {10, 8, 14, 7, 5, 4, 6};
+    // Input data from the provided table
     int arrival_times[] = {0, 1, 3, 4, 6, 7, 8};
+    int burst_times[] = {10, 8, 14, 7, 5, 4, 6};
 
     // Initialize processes
     for (i = 0; i < n; i++)
     {
         p[i].pid = i + 1;
-        p[i].burst_time = burst_times[i];
         p[i].arrival_time = arrival_times[i];
-        p[i].remaining_time = p[i].burst_time;
-        p[i].waiting_time = p[i].turnaround_time = 0;
+        p[i].burst_time = burst_times[i];
+        p[i].w_time = p[i].t_time = 0;
     }
 
-    int remaining_processes = n;
-    while (remaining_processes > 0)
+    // Sort processes based on burst time (Shortest Job First)
+    for (i = 0; i < n; i++)
     {
-        for (i = 0; i < n; i++)
+        for (j = i + 1; j < n; j++)
         {
-            if (p[i].remaining_time > 0)
+            if (p[i].burst_time > p[j].burst_time)
             {
-                int execute_time = (p[i].remaining_time < q) ? p[i].remaining_time : q;
-                p[i].remaining_time -= execute_time;
-                time += execute_time;
-
-                if (p[i].remaining_time == 0)
-                {
-                    remaining_processes--;
-                    p[i].turnaround_time = time - p[i].arrival_time;
-                    p[i].waiting_time = p[i].turnaround_time - p[i].burst_time;
-                }
+                // Swap processes
+                Process temp = p[i];
+                p[i] = p[j];
+                p[j] = temp;
             }
         }
     }
 
-    for (i = 0; i < n; i++)
+    // Calculate waiting time and turnaround time
+    p[0].start_time = p[0].arrival_time;
+    for (i = 1; i < n; i++)
     {
-        sum_w_time += p[i].waiting_time;
-        sum_t_time += p[i].turnaround_time;
+        p[i].start_time = p[i - 1].start_time + p[i - 1].burst_time;
+        p[i].w_time = p[i].start_time - p[i].arrival_time;
+        p[i].t_time = p[i].w_time + p[i].burst_time;
     }
 
+    // Calculate total waiting time and total turnaround time
+    for (i = 0; i < n; i++)
+    {
+        sum_w_time += p[i].w_time;
+        sum_t_time += p[i].t_time;
+    }
 
+    // Print results
     puts(""); // Empty Line
+    printf("Total Waiting Time      : %-2d\n", sum_w_time);
     printf("Average Waiting Time    : %-2.2lf\n", (double)sum_w_time / (double)n);
     printf("Average Turnaround Time : %-2.2lf\n", (double)sum_t_time / (double)n);
 
-    // print Gantt chart
+    // Print Gantt chart
     puts(""); // Empty line
     puts("          GANTT CHART          ");
     puts("          ***********          ");
     print_gantt_chart(p, n);
-
     return 0;
 }
-
 
 void print_gantt_chart(Process p[], int n)
 {
@@ -113,9 +114,9 @@ void print_gantt_chart(Process p[], int n)
     {
         for (j = 0; j < p[i].burst_time; j++)
             printf("  ");
-        if (p[i].turnaround_time > 9)
+        if (p[i].t_time > 9)
             printf("\b");
-        printf("%d", p[i].turnaround_time);
+        printf("%d", p[i].t_time);
     }
     printf("\n");
     getchar();
